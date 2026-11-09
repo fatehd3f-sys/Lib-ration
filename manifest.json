@@ -1,0 +1,18 @@
+{
+  "name": "تحرير إجهادات السكة",
+  "short_name": "إجهادات السكة",
+  "description": "حساب الفجوة والشدّ عند تحرير إجهادات السكة (LRS و ADV)",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "background_color": "#E8ECEF",
+  "theme_color": "#14212B",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

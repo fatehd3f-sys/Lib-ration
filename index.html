@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14212B">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="إجهادات السكة">
+<title>تحرير إجهادات السكة</title>
+<style>
+:root{
+  --bg:#E8ECEF; --surface:#FFFFFF; --ink:#14212B; --muted:#52636F; --line:#C5CED5;
+  --steel:#2F4757; --hivis:#F2C200; --on-hivis:#14212B; --warn:#A52A1D; --warn-bg:#FBE9E6;
+  --field:#F3F5F7; --focus:#1B6FA8;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#101A21; --surface:#18252E; --ink:#E7EDF1; --muted:#9DB0BC; --line:#2F4350;
+    --steel:#8FB0C4; --warn:#FF9C8F; --warn-bg:#3A1F1B; --field:#0F1A20; --focus:#6CB6E8;
+    color-scheme: dark;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Segoe UI",Tahoma,"Noto Sans Arabic",system-ui,-apple-system,sans-serif;
+  font-size:16px; line-height:1.5;
+  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+}
+.app{max-width:520px; margin:0 auto; padding:0 14px 40px}
+header{padding:18px 2px 10px}
+header h1{margin:0; font-size:21px; line-height:1.3; font-weight:700}
+header p{margin:2px 0 0; color:var(--muted); font-size:13px}
+.num,input,.hero-v b,td.n{font-variant-numeric:tabular-nums}
+.ltr{direction:ltr; unicode-bidi:isolate}
+
+/* tabs */
+.tabs{display:grid; grid-template-columns:1fr 1fr; gap:0; margin:6px 0 14px;
+  border:2px solid var(--steel); border-radius:10px; overflow:hidden; background:var(--surface)}
+.tab{appearance:none; border:0; background:transparent; color:var(--ink); font:inherit; font-weight:600;
+  padding:12px 8px; min-height:48px; cursor:pointer}
+.tab small{display:block; font-weight:400; font-size:12px; color:var(--muted)}
+.tab[aria-selected="true"]{background:var(--steel); color:var(--surface)}
+.tab[aria-selected="true"] small{color:inherit; opacity:.85}
+.tab+.tab{border-inline-start:2px solid var(--steel)}
+.tab:focus-visible,input:focus-visible,.seg label:has(input:focus-visible),summary:focus-visible{outline:3px solid var(--focus); outline-offset:2px}
+
+.panel[hidden]{display:none}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px; margin-bottom:12px}
+.card h2{margin:0 0 10px; font-size:15px; font-weight:700; color:var(--steel)}
+
+/* inputs */
+.field{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 0}
+.field+.field{border-top:1px solid var(--line)}
+.lbl{flex:1; font-weight:600; font-size:15px}
+.lbl small{display:block; font-weight:400; color:var(--muted); font-size:12px}
+.inp{display:flex; align-items:center; gap:6px; flex:0 0 150px}
+.inp input{width:100%; min-height:48px; font:inherit; font-size:20px; font-weight:600; text-align:center;
+  background:var(--field); color:var(--ink); border:1.5px solid var(--line); border-radius:8px; padding:6px; direction:ltr}
+.inp em{font-style:normal; color:var(--muted); font-size:13px; min-width:22px}
+
+.seg{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px}
+.seg label{display:block; text-align:center; border:1.5px solid var(--line); border-radius:8px; padding:10px 6px;
+  background:var(--field); cursor:pointer; min-height:48px}
+.seg input{position:absolute; opacity:0; pointer-events:none}
+.seg label:has(input:checked){border-color:var(--steel); background:var(--steel); color:var(--surface)}
+.seg b{display:block; font-size:16px}
+.seg span{font-size:12px; opacity:.85}
+
+/* hero */
+.hero{background:var(--hivis); color:var(--on-hivis); border-radius:12px; padding:16px 16px 14px; margin-bottom:12px;
+  display:flex; align-items:flex-end; justify-content:space-between; gap:12px}
+.hero-l{font-weight:700; font-size:15px; line-height:1.35}
+.hero-l small{display:block; font-weight:500; font-size:12px; opacity:.8}
+.hero-v{direction:ltr; display:flex; align-items:baseline; gap:6px}
+.hero-v b{font-size:44px; line-height:1; font-weight:800; letter-spacing:-.5px}
+.hero-v span{font-size:15px; font-weight:600}
+
+/* result rows */
+.rows{margin:0; padding:0}
+.row{display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:9px 0}
+.row+.row{border-top:1px solid var(--line)}
+.row dt{font-size:14.5px}
+.row dt small{display:block; color:var(--muted); font-size:12px}
+.row dd{margin:0; direction:ltr; white-space:nowrap; font-weight:700; font-size:18px}
+.row dd i{font-style:normal; font-weight:500; color:var(--muted); font-size:12px; margin-inline-start:4px}
+
+/* ruler list */
+.ruler{list-style:none; margin:0; padding:0}
+.ruler li{display:grid; grid-template-columns:34px 1fr 84px; align-items:center; gap:10px; padding:7px 0}
+.ruler li+li{border-top:1px solid var(--line)}
+.ruler .k{font-weight:700; color:var(--muted); text-align:center}
+.ruler .bar{height:10px; border-radius:2px; background:var(--field); border:1px solid var(--line); position:relative; direction:ltr}
+.ruler .bar i{position:absolute; inset:0 auto 0 0; background:var(--steel); border-radius:1px}
+.ruler .v{direction:ltr; text-align:end; font-weight:700}
+.ruler .v i{font-style:normal; font-weight:500; color:var(--muted); font-size:12px; margin-inline-start:3px}
+
+.note{background:var(--warn-bg); color:var(--warn); border-radius:8px; padding:9px 12px; font-size:13.5px; margin-bottom:12px; font-weight:600}
+.note:empty{display:none}
+.hint{color:var(--muted); font-size:12.5px; margin:8px 0 0}
+
+details{background:var(--surface); border:1px solid var(--line); border-radius:12px; margin-bottom:12px}
+summary{padding:14px; font-weight:700; color:var(--steel); cursor:pointer; min-height:48px; font-size:15px}
+details .inner{padding:0 14px 14px}
+table{width:100%; border-collapse:collapse; direction:ltr; font-size:14px}
+th,td{padding:5px 8px; text-align:end; border-top:1px solid var(--line)}
+th{color:var(--muted); font-weight:600; font-size:12.5px; border-top:0}
+tr.cur td{background:var(--hivis); color:var(--on-hivis); font-weight:700}
+footer{color:var(--muted); font-size:12px; padding:6px 2px}
+@media (prefers-reduced-motion:no-preference){ .ruler .bar i{transition:width .25s ease} }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>تحرير إجهادات السكة</h1>
+    <p>Libération des contraintes du rail</p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="نوع الحساب">
+    <button class="tab" role="tab" id="tab-lrs" aria-selected="true" aria-controls="p-lrs">LRS<small>L1 + L2</small></button>
+    <button class="tab" role="tab" id="tab-adv" aria-selected="false" aria-controls="p-adv">ADV<small>إدماج جهاز التبديل</small></button>
+  </div>
+
+  <!-- ===== LRS ===== -->
+  <section class="panel" id="p-lrs" role="tabpanel" aria-labelledby="tab-lrs">
+    <div class="card">
+      <h2>المدخلات</h2>
+      <label class="field"><span class="lbl">الطول L1<small>Longueur L1</small></span>
+        <span class="inp"><input id="a-L1" type="number" inputmode="decimal" value="400" min="0" step="any"><em>m</em></span></label>
+      <label class="field"><span class="lbl">الطول L2<small>Longueur L2</small></span>
+        <span class="inp"><input id="a-L2" type="number" inputmode="decimal" value="400" min="0" step="any"><em>m</em></span></label>
+      <label class="field"><span class="lbl">حرارة السكة عند التحرير<small>Température du rail à la libération (t°)</small></span>
+        <span class="inp"><input id="a-t" type="number" inputmode="numeric" value="31" step="1"><em>°C</em></span></label>
+      <label class="field"><span class="lbl">القيمة S<small>Sr (25 في الملف)</small></span>
+        <span class="inp"><input id="a-S" type="number" inputmode="decimal" value="25" step="any"><em></em></span></label>
+    </div>
+
+    <div class="note" id="a-note" role="status"></div>
+
+    <div class="hero">
+      <div class="hero-l">الفجوة المطلوب إنشاؤها<small>an — lacune à créer</small></div>
+      <div class="hero-v"><b id="a-an">—</b><span>mm</span></div>
+    </div>
+
+    <div class="card">
+      <h2>القيم الوسيطة</h2>
+      <dl class="rows">
+        <div class="row"><dt>L = L1 + L2<small>Longueur totale</small></dt><dd id="a-L">—<i>m</i></dd></div>
+        <div class="row"><dt>b<small>من جدول الحرارة</small></dt><dd id="a-b">—<i>mm</i></dd></div>
+        <div class="row"><dt>α<small>0,0115 × L × (35 − t) + b</small></dt><dd id="a-alpha">—<i>mm</i></dd></div>
+        <div class="row"><dt>ar (Fille gauche / droite)<small>= an</small></dt><dd id="a-ar">—<i>mm</i></dd></div>
+        <div class="row"><dt>Z1 = Z2<small>طول منطقة التثبيت — 3,8 × (35 − t)</small></dt><dd id="a-Z">—<i>m</i></dd></div>
+        <div class="row"><dt>Δl moyen<small>0,57 × (35 − t)</small></dt><dd id="a-dm">—</dd></div>
+        <div class="row"><dt>Maxi Δl<small>0,57 × (38 − t)</small></dt><dd id="a-dx">—</dd></div>
+        <div class="row"><dt>Mini Δl<small>0,52 × (32 − t)</small></dt><dd id="a-dn">—</dd></div>
+      </dl>
+    </div>
+
+    <div class="card">
+      <h2>الشدّ في كل جهة</h2>
+      <dl class="rows">
+        <div class="row"><dt>عدد الأقسام<small>L1 ÷ 50</small></dt><dd id="a-N">—</dd></div>
+        <div class="row"><dt>المجموع المطلوب قطعه<small>α ÷ 2 — Total à couper</small></dt><dd id="a-tot">—<i>mm</i></dd></div>
+        <div class="row"><dt>الطول المطلوب شدّه لكل قسم<small>Longueur à tirer par section</small></dt><dd id="a-step">—<i>mm</i></dd></div>
+      </dl>
+      <p class="hint">الطول المتراكم عند كل قسم:</p>
+      <ul class="ruler" id="a-ruler"></ul>
+    </div>
+  </section>
+
+  <!-- ===== ADV ===== -->
+  <section class="panel" id="p-adv" role="tabpanel" aria-labelledby="tab-adv" hidden>
+    <div class="card">
+      <h2>المدخلات</h2>
+      <label class="field"><span class="lbl">الطول L<small>Longueur L</small></span>
+        <span class="inp"><input id="d-L" type="number" inputmode="decimal" value="150" min="0" step="any"><em>m</em></span></label>
+      <label class="field"><span class="lbl">حرارة السكة عند التحرير<small>Température du rail à la libération (t°)</small></span>
+        <span class="inp"><input id="d-t" type="number" inputmode="numeric" value="30" step="1"><em>°C</em></span></label>
+      <label class="field"><span class="lbl">القيمة S<small>25 في الملف</small></span>
+        <span class="inp"><input id="d-S" type="number" inputmode="decimal" value="25" step="any"><em></em></span></label>
+      <div class="lbl" style="padding-top:8px">نوع جهاز التبديل<small>Type d'ADV</small></div>
+      <div class="seg" role="radiogroup" aria-label="نوع ADV">
+        <label><input type="radio" name="d-adv" value="41.594" checked><b>ADV 1/12</b><span>l = 41,594</span></label>
+        <label><input type="radio" name="d-adv" value="33.231"><b>ADV 1/9</b><span>l = 33,231</span></label>
+      </div>
+    </div>
+
+    <div class="note" id="d-note" role="status"></div>
+
+    <div class="hero">
+      <div class="hero-l">الفجوة المطلوب إنشاؤها<small>A — lacune "A" à créer</small></div>
+      <div class="hero-v"><b id="d-A">—</b><span>mm</span></div>
+    </div>
+
+    <div class="card">
+      <h2>القيم الوسيطة</h2>
+      <dl class="rows">
+        <div class="row"><dt>l'<small>l + 18</small></dt><dd id="d-lp">—</dd></div>
+        <div class="row"><dt>b / 2<small>من جدول الحرارة</small></dt><dd id="d-b">—<i>mm</i></dd></div>
+        <div class="row"><dt>α<small>0,0115 × L × (35 − t) + l'/200 × (35 − t) + b/2</small></dt><dd id="d-alpha">—<i>mm</i></dd></div>
+        <div class="row"><dt>Z1 = Z2<small>طول منطقة التثبيت — 3,5 × (35 − t)</small></dt><dd id="d-Z">—<i>m</i></dd></div>
+        <div class="row"><dt>Δl moyen<small>0,52 × (35 − t)</small></dt><dd id="d-dm">—</dd></div>
+        <div class="row"><dt>Maxi Δl<small>0,52 × (40 − t)</small></dt><dd id="d-dx">—</dd></div>
+        <div class="row"><dt>Mini Δl<small>0,52 × (30 − t)</small></dt><dd id="d-dn">—</dd></div>
+      </dl>
+    </div>
+
+    <div class="card">
+      <h2>الشدّ</h2>
+      <dl class="rows">
+        <div class="row"><dt>عدد الأقسام<small>L ÷ 50</small></dt><dd id="d-N">—</dd></div>
+        <div class="row"><dt>المجموع المطلوب قطعه<small>α — Total à couper</small></dt><dd id="d-tot">—<i>mm</i></dd></div>
+        <div class="row"><dt>الطول المطلوب شدّه لكل قسم<small>Longueur à tirer par repère</small></dt><dd id="d-step">—<i>mm</i></dd></div>
+      </dl>
+      <p class="hint">الطول المتراكم عند كل قسم:</p>
+      <ul class="ruler" id="d-ruler"></ul>
+    </div>
+  </section>
+
+  <details>
+    <summary>جدول المرجع: z و b حسب الحرارة</summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>t (°C)</th><th>z (m)</th><th>b (mm)</th></tr></thead>
+        <tbody id="ref-body"></tbody>
+      </table>
+      <p class="hint">القيم مأخوذة من الصفوف z و b في ورقة الإكسل. تُستخدم قيم b الصحيحة (جدول الحرارة 5 إلى 35) في الحساب.</p>
+    </div>
+  </details>
+
+  <footer>أدوات مساعدة للحساب فقط. تحقّق من النتائج وفق التعليمات المعتمدة لديكم.</footer>
+</div>
+
+<script>
+/* ===== CALC START ===== */
+const B_TABLE = [44,41,38,35,33,30,28,26,24,21,19,18,16,14,12,11,10,8,7,6,5,4,3,2,2,1,1,0,0,0,0]; // t = 5..35
+
+function bLookup(t){
+  const r = Math.round(t);
+  return (r >= 5 && r <= 35) ? B_TABLE[r - 5] : 0;
+}
+// ADV sheet uses 10 (not 11) at t = 20 in its own b/2 formula; kept as in the original file
+function bHalfADV(t){
+  const r = Math.round(t);
+  if (r === 20) return 10 / 2;
+  return bLookup(t) / 2;
+}
+
+function calcLRS(L1, L2, t, S){
+  const L = L1 + L2;
+  const b = bLookup(t);
+  const alpha = 0.0115 * L * (35 - t) + b;
+  const an = alpha + (S - 1);
+  const N = L1 / 50;
+  const tot = alpha / 2;
+  return {
+    L, b, alpha, an, ar: an,
+    Z: 3.8 * (35 - t),
+    dm: 0.57 * (35 - t), dx: 0.57 * (38 - t), dn: 0.52 * (32 - t),
+    N, tot, step: N > 0 ? tot / N : NaN
+  };
+}
+
+function calcADV(L, t, S, l){
+  const lp = l === 41.594 ? 59.594 : (l === 33.231 ? 51.231 : 0);
+  const b2 = bHalfADV(t);
+  const alpha = 0.0115 * L * (35 - t) + lp / 200 * (35 - t) + b2;
+  const A = alpha + (S - 1);
+  const N = L / 50;
+  return {
+    lp, b2, alpha, A,
+    Z: 3.5 * (35 - t),
+    dm: 0.52 * (35 - t), dx: 0.52 * (40 - t), dn: 0.52 * (30 - t),
+    N, tot: alpha, step: N > 0 ? alpha / N : NaN
+  };
+}
+/* ===== CALC END ===== */
+
+const $ = id => document.getElementById(id);
+const num = id => { const v = $(id).value; return v === '' ? NaN : Number(v); };
+const f2 = x => Number.isFinite(x) ? x.toFixed(2) : '—';
+const fN = x => Number.isFinite(x) ? (Number.isInteger(x) ? String(x) : x.toFixed(2)) : '—';
+
+function setVal(id, text, unit){
+  const el = $(id);
+  el.innerHTML = text + (unit ? '<i>' + unit + '</i>' : '');
+}
+
+function renderRuler(id, N, step){
+  const ul = $(id);
+  ul.innerHTML = '';
+  if (!Number.isFinite(N) || !Number.isFinite(step) || N <= 0) return;
+  const rows = Math.min(Math.ceil(N), 60);
+  const max = rows * step;
+  const frag = document.createDocumentFragment();
+  for (let n = 1; n <= rows; n++){
+    const v = n * step;
+    const li = document.createElement('li');
+    li.innerHTML = '<span class="k">' + n + '</span>' +
+      '<span class="bar"><i style="width:' + (max > 0 ? Math.max(0, Math.min(100, v / max * 100)) : 0).toFixed(1) + '%"></i></span>' +
+      '<span class="v">' + f2(v) + '<i>mm</i></span>';
+    frag.appendChild(li);
+  }
+  ul.appendChild(frag);
+}
+
+function tNote(t, N){
+  const msgs = [];
+  if (Number.isFinite(t)){
+    if (t < 5 || t > 35) msgs.push('الحرارة خارج مجال جدول b (من 5 إلى 35). تُعتبر b = 0 كما في ملف الإكسل.');
+    else if (!Number.isInteger(t)) msgs.push('جدول b بدرجات صحيحة: قُرّبت إلى ' + Math.round(t) + '°C لاختيار b.');
+  }
+  if (Number.isFinite(N) && N > 0 && !Number.isInteger(N)) msgs.push('عدد الأقسام غير صحيح (' + N.toFixed(2) + ').');
+  return msgs.join(' ');
+}
+
+function updateLRS(){
+  const t = num('a-t');
+  const r = calcLRS(num('a-L1'), num('a-L2'), t, num('a-S'));
+  $('a-an').textContent = f2(r.an);
+  setVal('a-L', fN(r.L), 'm');
+  setVal('a-b', fN(r.b), 'mm');
+  setVal('a-alpha', f2(r.alpha), 'mm');
+  setVal('a-ar', f2(r.ar), 'mm');
+  setVal('a-Z', f2(r.Z), 'm');
+  setVal('a-dm', f2(r.dm));
+  setVal('a-dx', f2(r.dx));
+  setVal('a-dn', f2(r.dn));
+  setVal('a-N', fN(r.N));
+  setVal('a-tot', f2(r.tot), 'mm');
+  setVal('a-step', f2(r.step), 'mm');
+  renderRuler('a-ruler', r.N, r.step);
+  $('a-note').textContent = tNote(t, r.N);
+}
+
+function updateADV(){
+  const t = num('d-t');
+  const l = Number(document.querySelector('input[name="d-adv"]:checked').value);
+  const r = calcADV(num('d-L'), t, num('d-S'), l);
+  $('d-A').textContent = f2(r.A);
+  setVal('d-lp', r.lp.toFixed(3));
+  setVal('d-b', fN(r.b2), 'mm');
+  setVal('d-alpha', f2(r.alpha), 'mm');
+  setVal('d-Z', f2(r.Z), 'm');
+  setVal('d-dm', f2(r.dm));
+  setVal('d-dx', f2(r.dx));
+  setVal('d-dn', f2(r.dn));
+  setVal('d-N', fN(r.N));
+  setVal('d-tot', f2(r.tot), 'mm');
+  setVal('d-step', f2(r.step), 'mm');
+  renderRuler('d-ruler', r.N, r.step);
+  $('d-note').textContent = tNote(t, r.N);
+}
+
+/* reference table (rows z and b of the sheet) */
+(function(){
+  const body = $('ref-body');
+  let h = '';
+  for (let t = 5; t <= 35; t++){
+    const z = 3.8 * (35 - t);
+    const b = 0.0128 * (35 - t) * z;
+    h += '<tr data-t="' + t + '"><td>' + t + '</td><td>' + z.toFixed(1) + '</td><td>' + b.toFixed(2) + '</td></tr>';
+  }
+  body.innerHTML = h;
+})();
+
+/* wiring */
+['a-L1','a-L2','a-t','a-S'].forEach(id => $(id).addEventListener('input', updateLRS));
+['d-L','d-t','d-S'].forEach(id => $(id).addEventListener('input', updateADV));
+document.querySelectorAll('input[name="d-adv"]').forEach(el => el.addEventListener('change', updateADV));
+
+function show(which){
+  const lrs = which === 'lrs';
+  $('p-lrs').hidden = !lrs; $('p-adv').hidden = lrs;
+  $('tab-lrs').setAttribute('aria-selected', lrs);
+  $('tab-adv').setAttribute('aria-selected', !lrs);
+}
+$('tab-lrs').addEventListener('click', () => show('lrs'));
+$('tab-adv').addEventListener('click', () => show('adv'));
+
+updateLRS(); updateADV();
+
+/* PWA: offline support */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
